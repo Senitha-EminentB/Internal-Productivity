@@ -16,7 +16,9 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173' // Allow requests from your frontend
+}));
 app.use(helmet());
 app.use(express.json());
 app.use(morgan('dev'));
