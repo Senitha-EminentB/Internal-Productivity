@@ -28,9 +28,9 @@ const getDashboardData = async (req, res) => {
         const [tasks, users, commits, bugs, timeLogs] = await Promise.all([
             projectDataService.getTasks(),
             projectDataService.getUsers(),
-            commitService.getCommits(),
-            bugService.getBugs(),
-            timeLogService.getTimeLogs()
+            commitService.getCommits ? commitService.getCommits() : commitService.generateMockCommits(),
+            bugService.getBugs ? bugService.getBugs() : bugService.generateMockBugs(),
+            timeLogService.getTimeLogs ? timeLogService.getTimeLogs() : timeLogService.generateMockTimeLogs()
         ]);
 
         const filteredTasks = filterByDateRange(tasks, range);
@@ -46,7 +46,14 @@ const getDashboardData = async (req, res) => {
             openBugs: filteredBugs.filter(bug => bug.status !== 'closed').length,
         };
 
-        res.json({ kpis, tasks: filteredTasks, users, commits: filteredCommits, bugs: filteredBugs, timeLogs: filteredTimeLogs });
+        res.json({ 
+            kpis, 
+            tasks: filteredTasks, 
+            users, 
+            commits: filteredCommits, 
+            bugs: filteredBugs, 
+            timeLogs: filteredTimeLogs 
+        });
     } catch (error) {
         console.error('Error fetching dashboard data:', error);
         res.status(500).json({ message: 'Failed to fetch dashboard data' });
@@ -58,8 +65,8 @@ const getKpis = async (req, res) => {
         const { range } = req.query;
         const [tasks, commits, bugs] = await Promise.all([
             projectDataService.getTasks(),
-            commitService.getCommits(),
-            bugService.getBugs(),
+            commitService.getCommits ? commitService.getCommits() : commitService.generateMockCommits(),
+            bugService.getBugs ? bugService.getBugs() : bugService.generateMockBugs(),
         ]);
 
         const filteredTasks = filterByDateRange(tasks, range);
@@ -84,8 +91,8 @@ const getInsights = async (req, res) => {
         const [tasks, users, commits, bugs] = await Promise.all([
             projectDataService.getTasks(),
             projectDataService.getUsers(),
-            commitService.getCommits(),
-            bugService.getBugs(),
+            commitService.getCommits ? commitService.getCommits() : commitService.generateMockCommits(),
+            bugService.getBugs ? bugService.getBugs() : bugService.generateMockBugs(),
         ]);
 
         const insights = insightService.generateInsights(tasks, users, commits, bugs);
@@ -98,7 +105,9 @@ const getInsights = async (req, res) => {
 
 const getCommits = async (req, res) => {
     try {
-        const commits = await commitService.generateMockCommits();
+        const commits = commitService.getCommits 
+            ? await commitService.getCommits() 
+            : await commitService.generateMockCommits();
         res.json(commits);
     } catch (error) {
         console.error('Error fetching commits:', error);
@@ -108,7 +117,9 @@ const getCommits = async (req, res) => {
 
 const getBugs = async (req, res) => {
     try {
-        const bugs = await bugService.generateMockBugs();
+        const bugs = bugService.getBugs 
+            ? await bugService.getBugs() 
+            : await bugService.generateMockBugs();
         res.json(bugs);
     } catch (error) {
         console.error('Error fetching bugs:', error);
@@ -118,7 +129,9 @@ const getBugs = async (req, res) => {
 
 const getTimeLogs = async (req, res) => {
     try {
-        const timeLogs = await timeLogService.generateMockTimeLogs();
+        const timeLogs = timeLogService.getTimeLogs 
+            ? await timeLogService.getTimeLogs() 
+            : await timeLogService.generateMockTimeLogs();
         res.json(timeLogs);
     } catch (error) {
         console.error('Error fetching time logs:', error);
@@ -131,9 +144,9 @@ const exportReport = async (req, res) => {
         const { format } = req.params; // 'csv' or 'pdf'
         const [tasks, commits, bugs, timeLogs] = await Promise.all([
             projectDataService.getTasks(),
-            commitService.getCommits(),
-            bugService.getBugs(),
-            timeLogService.getTimeLogs()
+            commitService.getCommits ? commitService.getCommits() : commitService.generateMockCommits(),
+            bugService.getBugs ? bugService.getBugs() : bugService.generateMockBugs(),
+            timeLogService.getTimeLogs ? timeLogService.getTimeLogs() : timeLogService.generateMockTimeLogs()
         ]);
         const data = { tasks, commits, bugs, timeLogs };
 
@@ -162,4 +175,4 @@ module.exports = {
     getBugs,
     getTimeLogs,
     exportReport,
-}; 
+};

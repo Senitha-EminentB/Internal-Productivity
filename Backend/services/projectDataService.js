@@ -7,25 +7,40 @@ let isReady = false;
 let readyPromise = null;
 
 const fetchTasks = async () => {
-  const response = await fetch(`${API_URL}/todos`);
-  if (!response.ok) throw new Error('Failed to fetch tasks');
-  return await response.json();
+  try {
+    const response = await fetch(`${API_URL}/todos`);
+    if (!response.ok) throw new Error('Failed to fetch tasks');
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    throw error;
+  }
 };
 
 const fetchUsers = async () => {
-  const response = await fetch(`${API_URL}/users`);
-  if (!response.ok) throw new Error('Failed to fetch users');
-  return await response.json();
+  try {
+    const response = await fetch(`${API_URL}/users`);
+    if (!response.ok) throw new Error('Failed to fetch users');
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
+  }
 };
 
 const refreshData = async () => {
   isReady = false;
   readyPromise = (async () => {
+    try {
       cachedTasks = await fetchTasks();
       cachedUsers = await fetchUsers();
       lastUpdated = new Date();
-      console.log('Mock tasks/users refreshed at', lastUpdated);
+      console.log('Data refreshed at', lastUpdated);
       isReady = true;
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      throw error;
+    }
   })();
   await readyPromise;
 };
@@ -36,6 +51,8 @@ refreshData();
 cron.schedule('0 0 * * *', refreshData);
 
 const getTasks = async (filter = {}) => {
+  if (!isReady) await ready();
+  
   // Optionally filter by week/month/sprint
   let tasks = cachedTasks;
   if (filter.range) {
@@ -54,12 +71,15 @@ const getTasks = async (filter = {}) => {
   return tasks;
 };
 
-const getUsers = async () => cachedUsers;
+const getUsers = async () => {
+  if (!isReady) await ready();
+  return cachedUsers;
+};
 
 const ready = async () => {
-    if (isReady) return;
-    if (readyPromise) await readyPromise;
-}
+  if (isReady) return;
+  if (readyPromise) await readyPromise;
+};
 
 module.exports = {
   getTasks,
@@ -67,4 +87,4 @@ module.exports = {
   refreshData,
   lastUpdated: () => lastUpdated,
   ready,
-}; 
+};

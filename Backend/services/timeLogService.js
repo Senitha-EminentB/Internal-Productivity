@@ -1,10 +1,11 @@
 const cron = require('node-cron');
-const projectDataService = require('./projectDataService');
+const { getUsers, getTasks, ready } = require('./projectDataService');
+
 let cachedTimeLogs = [];
 
 const generateMockTimeLogs = async () => {
-    const users = await projectDataService.getUsers();
-    const tasks = await projectDataService.getTasks();
+    const users = await getUsers();
+    const tasks = await getTasks();
     const timeLogs = [];
 
     if (users.length === 0 || tasks.length === 0) return [];
@@ -18,23 +19,24 @@ const generateMockTimeLogs = async () => {
             userName: user.name,
             taskId: task.id,
             taskTitle: task.title,
-            hours: (Math.random() * 8 + 0.5).toFixed(1), // Log between 0.5 and 8.5 hours
+            hours: (Math.random() * 8 + 0.5).toFixed(1), // 0.5 to 8.5 hours
             date: new Date(Date.now() - Math.floor(Math.random() * 1000 * 60 * 60 * 24 * 30)).toISOString(),
         });
     }
+
     return timeLogs;
 };
 
 const refreshData = async () => {
-    await projectDataService.ready(); // Wait for users and tasks to be loaded
+    await ready(); // Ensure projectDataService is ready
     cachedTimeLogs = await generateMockTimeLogs();
     console.log('Mock time logs refreshed at', new Date());
 };
 
 // Initial load & daily refresh
 refreshData();
-cron.schedule('0 0 * * *', refreshData);
+cron.schedule('0 0 * * *', refreshData); // Runs every day at midnight
 
 const getTimeLogs = async () => cachedTimeLogs;
 
-module.exports = { getTimeLogs }; 
+module.exports = { getTimeLogs };

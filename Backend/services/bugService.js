@@ -1,9 +1,9 @@
 const cron = require('node-cron');
-const projectDataService = require('./projectDataService');
+const { getUsers } = require('./projectDataService');
 let cachedBugs = [];
 
 const generateMockBugs = async () => {
-    const users = await projectDataService.getUsers();
+    const users = await getUsers();
     const bugs = [];
     const titles = [
         "UI glitch on dashboard page",
@@ -34,15 +34,27 @@ const generateMockBugs = async () => {
 };
 
 const refreshData = async () => {
-    await projectDataService.ready(); // Wait for users to be loaded
-    cachedBugs = await generateMockBugs();
-    console.log('Mock bugs refreshed at', new Date());
+    try {
+        cachedBugs = await generateMockBugs();
+        console.log('Mock bugs refreshed at', new Date());
+    } catch (error) {
+        console.error('Error refreshing bug data:', error);
+        throw error;
+    }
 };
 
 // Initial load & daily refresh
 refreshData();
 cron.schedule('0 0 * * *', refreshData);
 
-const getBugs = async () => cachedBugs;
+const getBugs = async () => {
+    if (!cachedBugs.length) {
+        await refreshData();
+    }
+    return cachedBugs;
+};
 
-module.exports = { getBugs }; 
+module.exports = { 
+    getBugs,
+    generateMockBugs 
+};
