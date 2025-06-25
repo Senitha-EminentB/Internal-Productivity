@@ -1,4 +1,6 @@
+const cron = require('node-cron');
 const { getUsers } = require('./projectDataService');
+let cachedCommits = [];
 
 const generateMockCommits = async () => {
     const users = await getUsers();
@@ -27,4 +29,15 @@ const generateMockCommits = async () => {
     return commits;
 };
 
-module.exports = { generateMockCommits }; 
+const refreshData = async () => {
+    cachedCommits = await generateMockCommits();
+    console.log('Mock commits refreshed at', new Date());
+};
+
+// Initial load & daily refresh
+refreshData();
+cron.schedule('0 0 * * *', refreshData);
+
+const getCommits = async () => cachedCommits;
+
+module.exports = { getCommits, generateMockCommits };
