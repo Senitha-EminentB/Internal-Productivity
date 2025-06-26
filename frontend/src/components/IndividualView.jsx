@@ -9,12 +9,9 @@ const IndividualView = ({ tasks, commits, bugs, timeLogs }) => {
         return <Typography>Please log in to see your individual stats.</Typography>;
     }
 
-    const userTasks = tasks.filter(t => t.userId === user.id);
-    const userCommits = commits.filter(c => c.userId === user.id);
-    const userBugs = bugs.filter(b => b.assignedTo === user.id);
-    const userTimeLogs = timeLogs.filter(tl => tl.userId === user.id);
-    
-    const totalHours = userTimeLogs.reduce((acc, log) => acc + parseFloat(log.hours), 0).toFixed(1);
+    // Since the backend already filters data based on user role,
+    // we can use the data directly without additional filtering
+    const totalHours = timeLogs.reduce((acc, log) => acc + parseFloat(log.hours || 0), 0).toFixed(1);
 
     return (
         <Box sx={{ mt: 4 }}>
@@ -24,7 +21,7 @@ const IndividualView = ({ tasks, commits, bugs, timeLogs }) => {
                     <Card>
                         <CardContent>
                             <Typography color="text.secondary">Tasks Completed</Typography>
-                            <Typography variant="h4">{userTasks.filter(t => t.completed).length}</Typography>
+                            <Typography variant="h4">{tasks.filter(t => t.completed).length}</Typography>
                         </CardContent>
                     </Card>
                 </Grid>
@@ -32,7 +29,7 @@ const IndividualView = ({ tasks, commits, bugs, timeLogs }) => {
                     <Card>
                         <CardContent>
                             <Typography color="text.secondary">Total Commits</Typography>
-                            <Typography variant="h4">{userCommits.length}</Typography>
+                            <Typography variant="h4">{commits.length}</Typography>
                         </CardContent>
                     </Card>
                 </Grid>
@@ -40,7 +37,7 @@ const IndividualView = ({ tasks, commits, bugs, timeLogs }) => {
                     <Card>
                         <CardContent>
                             <Typography color="text.secondary">Open Bugs</Typography>
-                            <Typography variant="h4">{userBugs.filter(b => b.status === 'open').length}</Typography>
+                            <Typography variant="h4">{bugs.filter(b => b.status === 'open').length}</Typography>
                         </CardContent>
                     </Card>
                 </Grid>
