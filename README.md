@@ -35,3 +35,19 @@
 
 ### Installation
 
+# Frontend
+cd frontend
+npm install
+
+# Backend
+cd ../backend
+npm install
+
+# In backend directory
+npm run dev
+
+# In frontend directory (new terminal)
+npm run dev
+
+
+
