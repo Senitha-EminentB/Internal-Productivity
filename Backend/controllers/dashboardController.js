@@ -41,12 +41,10 @@ const filterDataByRole = (data, userRole, userId, userTeam) => {
         // Developer gets personal access only
         return data.filter(item => {
             if (item.userId) {
-                // Convert both IDs to strings for comparison
-                return String(item.userId) === String(userId);
+                return item.userId === userId;
             }
             if (item.assignedTo) {
-                // Convert both IDs to strings for comparison
-                return String(item.assignedTo) === String(userId);
+                return item.assignedTo.id === userId;
             }
             return false; // Filter out items without clear user association
         });
