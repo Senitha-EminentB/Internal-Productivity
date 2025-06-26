@@ -42,6 +42,7 @@ const refreshData = async () => {
           createdAt: new Date(Date.now() - Math.floor(Math.random() * 1000 * 60 * 60 * 24 * 30)).toISOString(),
           userId: user ? user.id : undefined,
           team: user ? user.team : undefined,
+          deadline: new Date(Date.now() + Math.floor(Math.random() * 1000 * 60 * 60 * 24 * 30)).toISOString(),
         };
       });
       lastUpdated = new Date();

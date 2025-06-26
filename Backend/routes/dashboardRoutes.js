@@ -12,6 +12,6 @@ router.get('/insights', getInsights);
 router.get('/commits', getCommits);
 router.get('/bugs', getBugs);
 router.get('/timelogs', getTimeLogs);
-
+router.get('/export/:format', require('../controllers/dashboardController').exportReport);
 
 module.exports = router; 

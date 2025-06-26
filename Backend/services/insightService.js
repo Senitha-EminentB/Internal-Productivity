@@ -94,6 +94,24 @@ const generateInsights = (tasks, users, commits, bugs) => {
         }
     }
 
+    // Insight 2.5: Tasks at risk of missing deadlines
+    const now = new Date();
+    const atRiskTasks = tasks.filter(task => !task.completed && task.deadline && (new Date(task.deadline) - now < 3 * 24 * 60 * 60 * 1000) && (new Date(task.deadline) - now > 0));
+    if (atRiskTasks.length > 0) {
+        insights.push(`There are ${atRiskTasks.length} tasks at risk of missing their deadlines (due in 3 days or less).`);
+    }
+    // Recommend user with most at-risk tasks
+    if (atRiskTasks.length > 0) {
+        const atRiskByUser = users.map(user => ({
+            name: user.name,
+            count: atRiskTasks.filter(t => t.userId === user.id).length
+        }));
+        const userMostAtRisk = atRiskByUser.reduce((prev, curr) => (curr.count > prev.count ? curr : prev), { count: 0 });
+        if (userMostAtRisk.count > 0) {
+            insights.push(`Focus Recommendation: ${userMostAtRisk.name} has the most at-risk tasks (${userMostAtRisk.count}).`);
+        }
+    }
+
     return insights;
 };
 
