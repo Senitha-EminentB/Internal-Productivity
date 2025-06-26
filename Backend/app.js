@@ -18,7 +18,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173' // Allow requests from your frontend
+  origin: 'https://internal-productivity-frontend.onrender.com' // Allow requests from your frontend
 }));
 app.use(helmet());
 app.use(express.json());
