@@ -29,7 +29,7 @@ const NavBar = () => {
             <Toolbar>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                     <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        Productivity Dashboard
+                        DevMetrics
                     </Link>
                 </Typography>
                 {isAuthenticated && user ? (
