@@ -33,44 +33,47 @@ const Register = () => {
       await register(name, email, password, role);
       navigate('/');
     } catch (err) {
-      setError('Failed to register. The email might already be in use.');
+      setError('Registration failed. The email may already be in use.');
       console.error(err);
     }
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs" sx={{ mt: 8 }}>
       <Paper
-        elevation={3}
+        elevation={4}
         sx={{
-          mt: 8,
-          p: 4,
-          borderRadius: 2,
+          p: 5,
+          borderRadius: 3,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          boxShadow: 6,
+          backgroundColor: 'background.paper',
         }}
       >
-        
-        <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-          Create your account
+        <Typography
+          component="h1"
+          variant="h4"
+          sx={{ mb: 4, fontWeight: '700', color: 'text.primary' }}
+        >
+          Create Your Account
         </Typography>
 
         {error && (
-          <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+          <Alert severity="error" sx={{ width: '100%', mb: 4 }}>
             {error}
           </Alert>
         )}
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-          <Grid container spacing={2}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+          <Grid container spacing={3}>
             <Grid item xs={12}>
               <TextField
                 name="name"
+                label="Full Name"
                 required
                 fullWidth
-                id="name"
-                label="Name"
                 autoFocus
                 variant="outlined"
                 value={name}
@@ -79,29 +82,28 @@ const Register = () => {
             </Grid>
             <Grid item xs={12}>
               <TextField
+                name="email"
+                label="Email Address"
+                type="email"
                 required
                 fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
                 variant="outlined"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                required
-                fullWidth
                 name="password"
                 label="Password"
                 type="password"
-                id="password"
-                autoComplete="new-password"
+                required
+                fullWidth
                 variant="outlined"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
               />
             </Grid>
             <Grid item xs={12}>
@@ -127,14 +129,19 @@ const Register = () => {
             fullWidth
             variant="contained"
             size="large"
-            sx={{ mt: 3, mb: 2, borderRadius: 2 }}
+            sx={{ mt: 5, mb: 3, borderRadius: 2, fontWeight: '600' }}
           >
             Sign Up
           </Button>
 
           <Grid container justifyContent="flex-end">
             <Grid item>
-              <MuiLink component={RouterLink} to="/login" variant="body2">
+              <MuiLink
+                component={RouterLink}
+                to="/login"
+                variant="body2"
+                sx={{ fontWeight: '500' }}
+              >
                 Already have an account? Sign in
               </MuiLink>
             </Grid>
