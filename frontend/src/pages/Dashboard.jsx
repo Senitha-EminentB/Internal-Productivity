@@ -8,7 +8,9 @@ import TimeLogsTable from '../components/TimeLogsTable';
 import InsightList from '../components/InsightList';
 import TeamView from '../components/TeamView';
 import IndividualView from '../components/IndividualView';
+import UserManagement from '../components/UserManagement';
 import { getDashboardData, getInsights, exportReport } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -20,11 +22,36 @@ function TabPanel(props) {
 }
 
 export default function Dashboard() {
+    const { user } = useAuth();
     const [data, setData] = useState({ tasks: [], users: [], commits: [], bugs: [], timeLogs: [] });
     const [insights, setInsights] = useState([]);
     const [loading, setLoading] = useState(true);
     const [range, setRange] = useState(''); // '', 'week', 'month'
     const [tabIndex, setTabIndex] = useState(0);
+
+    // Determine available tabs based on user role
+    const getAvailableTabs = () => {
+        if (user?.role === 'admin') {
+            return [
+                { label: 'Overview', index: 0 },
+                { label: 'Team View', index: 1 },
+                { label: 'Individual View', index: 2 },
+                { label: 'User Management', index: 3 }
+            ];
+        } else if (user?.role === 'manager') {
+            return [
+                { label: 'Overview', index: 0 },
+                { label: 'Team View', index: 1 }
+            ];
+        } else {
+            return [
+                { label: 'Overview', index: 0 },
+                { label: 'Individual View', index: 1 }
+            ];
+        }
+    };
+
+    const availableTabs = getAvailableTabs();
 
     useEffect(() => {
         async function fetchData() {
@@ -56,6 +83,9 @@ export default function Dashboard() {
         { title: 'Hours Logged', value: data.timeLogs.reduce((acc, log) => acc + parseFloat(log.hours), 0).toFixed(1) + 'h' },
     ];
 
+    // Show insights only for admin and manager
+    const showInsights = user?.role === 'admin' || user?.role === 'manager';
+
     return (
         <Box sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -64,16 +94,19 @@ export default function Dashboard() {
                     <Button onClick={() => setRange('week')} variant={range === 'week' ? 'contained' : 'outlined'}>Week</Button>
                     <Button onClick={() => setRange('month')} variant={range === 'month' ? 'contained' : 'outlined'}>Month</Button>
                 </ButtonGroup>
-                <ButtonGroup>
-                    <Button onClick={() => handleExport('csv')}>Export CSV</Button>
-                    <Button onClick={() => handleExport('pdf')}>Export PDF</Button>
-                </ButtonGroup>
+                {/* Show export buttons only for admin and manager */}
+                {(user?.role === 'admin' || user?.role === 'manager') && (
+                    <ButtonGroup>
+                        <Button onClick={() => handleExport('csv')}>Export CSV</Button>
+                        <Button onClick={() => handleExport('pdf')}>Export PDF</Button>
+                    </ButtonGroup>
+                )}
             </Box>
             
             <Tabs value={tabIndex} onChange={(e, newValue) => setTabIndex(newValue)} centered>
-                <Tab label="Overview" />
-                <Tab label="Team View" />
-                <Tab label="Individual View" />
+                {availableTabs.map((tab) => (
+                    <Tab key={tab.index} label={tab.label} />
+                ))}
             </Tabs>
 
             <TabPanel value={tabIndex} index={0}>
@@ -85,19 +118,41 @@ export default function Dashboard() {
                         </Grid>
                     ))}
                 </Grid>
-                <InsightList insights={insights} loading={loading} />
+                {showInsights && <InsightList insights={insights} loading={loading} />}
                 <CommitsTable commits={data.commits} loading={loading} />
                 <BugsTable bugs={data.bugs} loading={loading} />
                 <TimeLogsTable timeLogs={data.timeLogs} loading={loading} />
             </TabPanel>
 
-            <TabPanel value={tabIndex} index={1}>
-                <TeamView users={data.users} tasks={data.tasks} commits={data.commits} bugs={data.bugs} />
-            </TabPanel>
+            {user?.role === 'admin' && (
+                <TabPanel value={tabIndex} index={1}>
+                    <TeamView users={data.users} tasks={data.tasks} commits={data.commits} bugs={data.bugs} />
+                </TabPanel>
+            )}
 
-            <TabPanel value={tabIndex} index={2}>
-                <IndividualView tasks={data.tasks} commits={data.commits} bugs={data.bugs} timeLogs={data.timeLogs} />
-            </TabPanel>
+            {user?.role === 'admin' && (
+                <TabPanel value={tabIndex} index={2}>
+                    <IndividualView tasks={data.tasks} commits={data.commits} bugs={data.bugs} timeLogs={data.timeLogs} />
+                </TabPanel>
+            )}
+
+            {user?.role === 'admin' && (
+                <TabPanel value={tabIndex} index={3}>
+                    <UserManagement />
+                </TabPanel>
+            )}
+
+            {user?.role === 'manager' && (
+                <TabPanel value={tabIndex} index={1}>
+                    <TeamView users={data.users} tasks={data.tasks} commits={data.commits} bugs={data.bugs} />
+                </TabPanel>
+            )}
+
+            {user?.role === 'developer' && (
+                <TabPanel value={tabIndex} index={1}>
+                    <IndividualView tasks={data.tasks} commits={data.commits} bugs={data.bugs} timeLogs={data.timeLogs} />
+                </TabPanel>
+            )}
         </Box>
     );
 }

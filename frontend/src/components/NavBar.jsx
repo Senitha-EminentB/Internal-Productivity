@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Chip } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -11,6 +11,19 @@ const NavBar = () => {
         navigate('/login');
     };
 
+    const getRoleColor = (role) => {
+        switch (role) {
+            case 'admin': return 'error';
+            case 'manager': return 'warning';
+            case 'developer': return 'info';
+            default: return 'default';
+        }
+    };
+
+    const getRoleLabel = (role) => {
+        return role.charAt(0).toUpperCase() + role.slice(1);
+    };
+
     return (
         <AppBar position="static">
             <Toolbar>
@@ -20,8 +33,21 @@ const NavBar = () => {
                     </Link>
                 </Typography>
                 {isAuthenticated && user ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Typography sx={{ mr: 2 }}>Welcome, {user.name}</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Typography variant="body2">
+                            Welcome, {user.name}
+                        </Typography>
+                        <Chip 
+                            label={getRoleLabel(user.role)} 
+                            color={getRoleColor(user.role)}
+                            size="small"
+                            variant="outlined"
+                        />
+                        {user.team && (
+                            <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                                Team: {user.team}
+                            </Typography>
+                        )}
                         <Button color="inherit" onClick={handleLogout}>Logout</Button>
                     </Box>
                 ) : (

@@ -8,6 +8,7 @@ const errorHandler = require('./middlewares/error');
 // Route files
 const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // Create express app
 const app = express();
@@ -26,6 +27,7 @@ app.use(morgan('dev'));
 // Mount routers
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handler middleware (should be last)
 app.use(errorHandler);

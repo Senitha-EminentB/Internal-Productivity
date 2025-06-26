@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { Button, TextField, Container, Typography, Box, Alert, Grid } from '@mui/material';
+import { Button, TextField, Container, Typography, Box, Alert, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
 const Register = () => {
     const { register } = useAuth();
@@ -9,13 +9,14 @@ const Register = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('developer');
     const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         try {
-            await register(name, email, password);
+            await register(name, email, password, role);
             navigate('/');
         } catch (err) {
             setError('Failed to register. The email might already be in use.');
@@ -75,6 +76,22 @@ const Register = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControl fullWidth required>
+                                <InputLabel id="role-label">Role</InputLabel>
+                                <Select
+                                    labelId="role-label"
+                                    id="role"
+                                    value={role}
+                                    label="Role"
+                                    onChange={(e) => setRole(e.target.value)}
+                                >
+                                    <MenuItem value="admin">Admin</MenuItem>
+                                    <MenuItem value="manager">Manager</MenuItem>
+                                    <MenuItem value="developer">Developer</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Grid>
                     </Grid>
                     <Button
