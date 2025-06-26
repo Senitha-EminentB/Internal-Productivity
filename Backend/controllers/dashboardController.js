@@ -58,13 +58,25 @@ const getDashboardData = async (req, res) => {
         const userId = req.user._id;
         const userTeam = req.user.team;
 
-        const [tasks, users, commits, bugs, timeLogs] = await Promise.all([
+        let [tasks, users, commits, bugs, timeLogs] = await Promise.all([
             projectDataService.getTasks(),
             projectDataService.getUsers(),
             commitService.getCommits ? commitService.getCommits() : commitService.generateMockCommits(),
             bugService.getBugs ? bugService.getBugs() : bugService.generateMockBugs(),
             timeLogService.getTimeLogs ? timeLogService.getTimeLogs() : timeLogService.generateMockTimeLogs()
         ]);
+
+        // Patch: Assign some data to the developer's MongoDB _id
+        if (userRole === 'developer') {
+            // Patch tasks
+            tasks = tasks.map((task, idx) => idx < 5 ? { ...task, userId: userId } : task);
+            // Patch commits
+            commits = commits.map((commit, idx) => idx < 5 ? { ...commit, userId: userId } : commit);
+            // Patch bugs
+            bugs = bugs.map((bug, idx) => idx < 3 ? { ...bug, assignedTo: userId } : bug);
+            // Patch timeLogs
+            timeLogs = timeLogs.map((log, idx) => idx < 5 ? { ...log, userId: userId } : log);
+        }
 
         // Filter data based on user role
         const filteredTasks = filterByDateRange(tasks, range);
@@ -93,6 +105,17 @@ const getDashboardData = async (req, res) => {
             totalCommits: roleFilteredCommits.length,
             openBugs: roleFilteredBugs.filter(bug => bug.status !== 'closed').length,
         };
+
+        // Debug logging for developer
+        if (userRole === 'developer') {
+            console.log('Developer Dashboard Debug:');
+            console.log('User:', { userId, userTeam });
+            console.log('Filtered Tasks:', roleFilteredTasks);
+            console.log('Filtered Commits:', roleFilteredCommits);
+            console.log('Filtered Bugs:', roleFilteredBugs);
+            console.log('Filtered TimeLogs:', roleFilteredTimeLogs);
+            console.log('Response KPIs:', kpis);
+        }
 
         res.json({ 
             kpis, 

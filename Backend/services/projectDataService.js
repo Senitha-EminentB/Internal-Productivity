@@ -32,8 +32,18 @@ const refreshData = async () => {
   isReady = false;
   readyPromise = (async () => {
     try {
-      cachedTasks = await fetchTasks();
+      const tasksRaw = await fetchTasks();
       cachedUsers = await fetchUsers();
+      // Enhance tasks with createdAt, userId, and team fields
+      cachedTasks = tasksRaw.map(task => {
+        const user = cachedUsers.length > 0 ? cachedUsers[Math.floor(Math.random() * cachedUsers.length)] : null;
+        return {
+          ...task,
+          createdAt: new Date(Date.now() - Math.floor(Math.random() * 1000 * 60 * 60 * 24 * 30)).toISOString(),
+          userId: user ? user.id : undefined,
+          team: user ? user.team : undefined,
+        };
+      });
       lastUpdated = new Date();
       console.log('Data refreshed at', lastUpdated);
       isReady = true;
